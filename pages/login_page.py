@@ -25,5 +25,3 @@ class LoginPageHelper(BasePage):
     @allure.step("Ожидание загрузки страницы")
     def wait_enter_button(self):
         self.wait_element_visible(LoginPageLocators.ENTER_BUTTON)
-
-

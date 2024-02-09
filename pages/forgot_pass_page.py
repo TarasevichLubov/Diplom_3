@@ -15,5 +15,3 @@ class ForgotPassPageHelper(BasePage):
     @allure.step("Ожидание загрузки страницы для восстановления пароля")
     def wait_form_forgot_pass_load(self):
         self.wait_element_visible(ForgotPageLocators.RECOVER_PASSWORD_BUTTON)
-
-
