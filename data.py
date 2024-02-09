@@ -4,8 +4,11 @@ class ConstantData:
     FORGOT_PASSWORD = BASE_URL + "forgot-password"
     RESET_PASSWORD = BASE_URL + "reset-password"
     ORDER = BASE_URL + "feed"
+    PROFILE = BASE_URL + "account/profile"
+    HISTORY = BASE_URL + "account/order-history"
 
-    name = 'Tim'
-    passwd = 'Tim12345'
-    e_mail = 'Tim@testmail.com'
-    #ORDER_URL = BASE_URL + "order"
+
+class TestData:
+    name = 'Pol'
+    passwd = 'Pol12345'
+    e_mail = 'Pol@testmail.com'

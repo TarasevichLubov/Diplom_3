@@ -2,6 +2,7 @@ from selenium.webdriver.common.by import By
 
 
 class OrderPageLocators:
+
     ORDER_CARD = (By.XPATH, ".//div[contains(@class, 'OrderFeed_contentBox')]/ul/li[1]")
     ALL_ORDERS = (By.XPATH, ".//p[text()='Выполнено за все время:']/following-sibling::p")
     DAY_ORDERS = (By.XPATH, ".//p[text()='Выполнено за сегодня:']/following-sibling::p")

@@ -1,11 +1,8 @@
-import time
 import allure
 from data import ConstantData
 from pages.order_page import OrderPageHelper
-from locators.order_page_locator import OrderPageLocators
-from locators.main_page_locators import MainPageLocators
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.wait import WebDriverWait
+from pages.login_page import LoginPageHelper
+from pages.account_page import AccountPageHelper
 from pages.main_page import MainPageHelper
 
 
@@ -16,9 +13,7 @@ class TestOrders:
     def test_order_click(self, driver):
         order_page = OrderPageHelper(driver)
         order_page.go_to_page(ConstantData.ORDER)
-        time.sleep(3)
         order_page.click_order_button()
-        time.sleep(3)
         selected_class = order_page.get_card_view_class()
         assert 'modal_opened' in selected_class
 
@@ -26,28 +21,21 @@ class TestOrders:
     @allure.description("Тестирование, что заказы пользователя из раздела «История заказов» "
                         "отображаются на странице «Лента заказов».")
     def test_include_orders(self, driver):
+        login_page = LoginPageHelper(driver)
+        login_page.go_to_page(ConstantData.AUTH_URL)
+        login_page.user_login()
         main_page = MainPageHelper(driver)
-        main_page.go_to_page(ConstantData.BASE_URL)
-        main_page.user_login()
-        time.sleep(3)
+        main_page.wait_button_add_order_visible()
         main_page.click_account_button()
-        WebDriverWait(driver, 20).until(expected_conditions.visibility_of_element_located((MainPageLocators.BUTTON_EXIT)))
-        time.sleep(3)
-        main_page.history_button_click()
-        cards = main_page.find_elements(MainPageLocators.HISTORY_CARD)
-        card_list = []
-        for card in cards:
-            card_list.append(card.text)
+        account_page = AccountPageHelper(driver)
+        account_page.history_order_click()
+        cards = account_page.get_history_card()
+        card_list = account_page.get_list_element(cards)
         order_page = OrderPageHelper(driver)
         order_page.go_to_page(ConstantData.ORDER)
         history = order_page.get_history_order()
-        history_list = []
-        for hr in history:
-            history_list.append(hr.text)
-        check_order = 0
-        for cards in card_list:
-            if cards in history_list:
-                check_order += 1
+        history_list = order_page.get_list_element(history)
+        check_order = order_page.check_orders_in_history(card_list, history_list)
 
         assert check_order == len(card_list)
 
@@ -57,16 +45,16 @@ class TestOrders:
         order_page = OrderPageHelper(driver)
         order_page.go_to_page(ConstantData.ORDER)
         count_all_orders = int(order_page.get_count_all_orders())
+        login_page = LoginPageHelper(driver)
+        login_page.go_to_page(ConstantData.AUTH_URL)
+        login_page.user_login()
         main_page = MainPageHelper(driver)
         main_page.go_to_page(ConstantData.BASE_URL)
-        main_page.user_login()
-        time.sleep(3)
-        main_page.drag_and_drop(MainPageLocators.CARDS_LOCATOR, MainPageLocators.ORDER_ADD)
-        time.sleep(3)
+        main_page.wait_button_add_order_visible()
+        main_page.add_ingredient_in_order()
+        main_page.wait_num_order()
         main_page.click_orders_register()
-        time.sleep(3)
-        wait = WebDriverWait(driver, 10)
-        wait.until_not(expected_conditions.text_to_be_present_in_element(OrderPageLocators.ALL_ORDERS, '9999'))
+        main_page.wait_all_num_order()
         new_count = int(main_page.get_all_orders_count())
         assert count_all_orders+1 == new_count
 
@@ -76,15 +64,17 @@ class TestOrders:
         order_page = OrderPageHelper(driver)
         order_page.go_to_page(ConstantData.ORDER)
         count_all_orders = int(order_page.get_count_day_orders())
+        login_page = LoginPageHelper(driver)
+        login_page.go_to_page(ConstantData.AUTH_URL)
+        login_page.user_login()
         main_page = MainPageHelper(driver)
         main_page.go_to_page(ConstantData.BASE_URL)
-        main_page.user_login()
-        WebDriverWait(driver, 20).until(expected_conditions.visibility_of_element_located((MainPageLocators.BUTTON_ORDER_REGISTER)))
-        main_page.drag_and_drop(MainPageLocators.CARDS_LOCATOR, MainPageLocators.ORDER_ADD)
+        main_page.wait_button_add_order_visible()
+        main_page.add_ingredient_in_order()
+        main_page.wait_num_order()
         main_page.click_orders_register()
-        time.sleep(3)
-        wait = WebDriverWait(driver, 10)
-        wait.until_not(expected_conditions.text_to_be_present_in_element(OrderPageLocators.ALL_ORDERS, '9999'))
+        main_page.wait_all_num_order()
+        main_page.close_card_click()
         order_page.go_to_page(ConstantData.ORDER)
         new_count_all_orders = int(order_page.get_count_day_orders())
         assert count_all_orders < new_count_all_orders
@@ -92,22 +82,19 @@ class TestOrders:
     @allure.title("Тестирование счетчика заказа.")
     @allure.description("Тестирование, что после оформления заказа его номер появляется в разделе В работе.")
     def test_in_work(self, driver):
+        login_page = LoginPageHelper(driver)
+        login_page.go_to_page(ConstantData.AUTH_URL)
+        login_page.user_login()
         main_page = MainPageHelper(driver)
         main_page.go_to_page(ConstantData.BASE_URL)
-        main_page.user_login()
-        time.sleep(3)
-        main_page.drag_and_drop(MainPageLocators.CARDS_LOCATOR, MainPageLocators.ORDER_ADD)
-        time.sleep(3)
+        main_page.wait_button_add_order_visible()
+        main_page.add_ingredient_in_order()
+        main_page.wait_num_order()
         main_page.click_orders_register()
-        wait = WebDriverWait(driver, 10)
-        wait.until_not(expected_conditions.text_to_be_present_in_element(OrderPageLocators.ALL_ORDERS, '9999'))
-        id_order = main_page.get_order_id()
+        id_order = main_page.get_all_orders_count()
         main_page.close_card_click()
         order_page = OrderPageHelper(driver)
         order_page.go_to_page(ConstantData.ORDER)
-        time.sleep(3)
-        wait = WebDriverWait(driver, 20)
-        wait.until_not(expected_conditions.text_to_be_present_in_element(OrderPageLocators.ALL_ORDERS,
-                                                                         'Все текущие заказы готовы!'))
+        order_page.wait_all_orders()
         order_list = order_page.get_in_work_orders()
         assert id_order in order_list
